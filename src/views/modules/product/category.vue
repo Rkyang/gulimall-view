@@ -1,29 +1,52 @@
 <template>
-  <el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+  <el-tree :data="category" :props="defaultProps" :expand-on-click-node="false" node-key="catId" show-checkbox>
+    <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span>{{ node.label }}</span>
+        <span>
+          <el-button
+            v-if="node.level <= 2"
+            type="text"
+            size="mini"
+            @click="() => append(data)">
+            Append
+          </el-button>
+          <el-button
+            v-if="node.childNodes.length === 0"
+            type="text"
+            size="mini"
+            @click="() => remove(node, data)">
+            Delete
+          </el-button>
+        </span>
+      </span>
+  </el-tree>
 </template>
 
 <script>
 export default {
   data () {
     return {
-      data: [],
+      category: [],
       defaultProps: {
-        children: 'children',
-        label: 'label'
+        children: 'child',
+        label: 'name'
       }
     }
   },
   methods: {
-    handleNodeClick (data) {
-      console.log(data)
-    },
     getCategory () {
       this.$http({
         url: this.$http.adornUrl('/product/category/list/tree'),
         method: 'get'
       }).then(({data}) => {
-        console.log('获取成功……', data)
+        this.category = data.listTree
       })
+    },
+    append (data) {
+      console.log('append', data)
+    },
+    remove (node, data) {
+      console.log('remove', node, data)
     }
   },
   created () {

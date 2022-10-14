@@ -5,7 +5,7 @@
              :expand-on-click-node="false"
              node-key="catId"
              :default-expanded-keys="defaultExpanded"
-             show-checkbox>
+             show-checkbox draggable :allow-drop="allowDrop">
     <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
         <span>
@@ -176,6 +176,33 @@ export default {
     dialogClose () {
       this.categoryInfo = this.$options.data().categoryInfo
       this.dialogFormVisible = false
+    },
+    // 判断是否可以拖拽至目标层级
+    allowDrop (draggingNode, dropNode, type) {
+      console.log(draggingNode, dropNode, type)
+      // 获取目标层级的最大层级
+      var targetMaxDeep = this.getMaxDeep(draggingNode.data)
+      console.log('targetMax:', targetMaxDeep)
+      // 最终层级 = 目标最大层级 - 目标本身层级 + 1
+      var finalMaxDeep = targetMaxDeep - draggingNode.data.catLevel + 1
+      console.log('finalMax:', finalMaxDeep)
+      if (type === 'inner') {
+        return (finalMaxDeep + draggingNode.level) <= 3
+      } else {
+        return (finalMaxDeep + draggingNode.parent.level) <= 3
+      }
+    },
+    // 获取节点的最深层级的等级
+    getMaxDeep (node, max = 0) {
+      if (node.child != null && node.child.length > 0) {
+        for (let i = 0; i < node.child.length; i++) {
+          if (node.child[i].catLevel > max) {
+            max = node.child[i].catLevel
+          }
+          max = this.getMaxDeep(node.child[i], max)
+        }
+      }
+      return max
     }
   },
   created () {

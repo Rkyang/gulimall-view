@@ -1,11 +1,16 @@
 <template>
   <div>
+    <el-switch v-model="treeDraggable" active-text="开始拖拽" inactive-text="关闭拖拽"></el-switch>
+    <el-button v-if="treeDraggable" @click="saveSort">保存拖拽</el-button>
     <el-tree :data="category"
              :props="defaultProps"
              :expand-on-click-node="false"
              node-key="catId"
              :default-expanded-keys="defaultExpanded"
-             show-checkbox draggable :allow-drop="allowDrop" @node-drop="handleDrop">
+             show-checkbox
+             :draggable="treeDraggable"
+             :allow-drop="allowDrop"
+             @node-drop="handleDrop">
     <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
         <span>
@@ -74,7 +79,9 @@ export default {
       defaultProps: {
         children: 'child',
         label: 'name'
-      }
+      },
+      treeDraggable: false,
+      updateCategories: []
     }
   },
   methods: {
@@ -181,10 +188,10 @@ export default {
     allowDrop (draggingNode, dropNode, type) {
       console.log(draggingNode, dropNode, type)
       // 获取目标层级的最大层级
-      var targetMaxDeep = this.getMaxDeep(draggingNode.data)
+      var targetMaxDeep = this.getMaxDeep(draggingNode)
       console.log('targetMax:', targetMaxDeep)
       // 最终层级 = 目标最大层级 - 目标本身层级 + 1
-      var finalMaxDeep = targetMaxDeep - draggingNode.data.catLevel + 1
+      var finalMaxDeep = Math.abs(targetMaxDeep - draggingNode.level) + 1
       console.log('finalMax:', finalMaxDeep)
       if (type === 'inner') {
         return (finalMaxDeep + draggingNode.level) <= 3
@@ -194,12 +201,12 @@ export default {
     },
     // 获取节点的最深层级的等级
     getMaxDeep (node, max = 0) {
-      if (node.child != null && node.child.length > 0) {
-        for (let i = 0; i < node.child.length; i++) {
-          if (node.child[i].catLevel > max) {
-            max = node.child[i].catLevel
+      if (node.childNodes != null && node.childNodes.length > 0) {
+        for (let i = 0; i < node.childNodes.length; i++) {
+          if (node.childNodes[i].level > max) {
+            max = node.childNodes[i].level
           }
-          max = this.getMaxDeep(node.child[i], max)
+          max = this.getMaxDeep(node.childNodes[i], max)
         }
       }
       return max
@@ -210,8 +217,6 @@ export default {
       let newParentCid = 0
       // 需要更新排序的分类
       let siblings = null
-      // 封装完数据的更新对象
-      let updateCategories = []
 
       if (dropType === 'inner') {
         // 拖拽至目标节点之内
@@ -237,27 +242,13 @@ export default {
             // 更新层级
             catLevel = siblings[i].level
             // 更新子节点的层级
-            this.updateChildNodeLevel(siblings[i], updateCategories)
+            this.updateChildNodeLevel(siblings[i], this.updateCategories)
           }
-          updateCategories.push({catId: siblings[i].data.catId, sort: i, parentCid: newParentCid, catLevel: catLevel})
+          this.updateCategories.push({catId: siblings[i].data.catId, sort: i, parentCid: newParentCid, catLevel: catLevel})
         } else {
-          updateCategories.push({catId: siblings[i].data.catId, sort: i})
+          this.updateCategories.push({catId: siblings[i].data.catId, sort: i})
         }
       }
-
-      this.$http({
-        url: this.$http.adornUrl('/product/category/update/sort'),
-        method: 'post',
-        data: this.$http.adornData(updateCategories, false)
-      }).then(({data}) => {
-        this.$message({
-          message: '分类调整成功',
-          type: 'success'
-        })
-        this.dialogClose()
-        this.getCategory()
-        this.defaultExpanded = [newParentCid]
-      })
     },
     // 递归更新子节点的层级
     updateChildNodeLevel (node, updateCategories) {
@@ -267,6 +258,29 @@ export default {
           updateCategories.push({catId: childData.catId, catLevel: node.childNodes[i].level})
           this.updateChildNodeLevel(node.childNodes[i], updateCategories)
         }
+      }
+    },
+    // 保存拖拽
+    saveSort () {
+      if (this.updateCategories.length === 0) {
+        this.$message({
+          message: '分类顺序未改动',
+          type: 'info'
+        })
+      } else {
+        this.$http({
+          url: this.$http.adornUrl('/product/category/update/sort'),
+          method: 'post',
+          data: this.$http.adornData(this.updateCategories, false)
+        }).then(({data}) => {
+          this.$message({
+            message: '分类调整成功',
+            type: 'success'
+          })
+          this.dialogClose()
+          this.getCategory()
+        })
+        this.updateCategories = []
       }
     }
   },

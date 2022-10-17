@@ -2,6 +2,7 @@
   <div>
     <el-switch v-model="treeDraggable" active-text="开始拖拽" inactive-text="关闭拖拽"></el-switch>
     <el-button v-if="treeDraggable" @click="saveSort">保存拖拽</el-button>
+    <el-button type="danger" @click="batchDelete">批量删除</el-button>
     <el-tree :data="category"
              :props="defaultProps"
              :expand-on-click-node="false"
@@ -10,7 +11,8 @@
              show-checkbox
              :draggable="treeDraggable"
              :allow-drop="allowDrop"
-             @node-drop="handleDrop">
+             @node-drop="handleDrop"
+             ref="tree">
     <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
         <span>
@@ -282,6 +284,40 @@ export default {
         })
         this.updateCategories = []
       }
+    },
+    // 批量删除
+    batchDelete () {
+      const checkedNodes = this.$refs.tree.getCheckedNodes()
+      if (checkedNodes == null || checkedNodes.length <= 0) {
+        this.$message({
+          message: '请勾选需要删除的分类',
+          type: 'info'
+        })
+        return
+      }
+      const ids = checkedNodes.map(item => item.catId)
+      this.$confirm(`将删除${checkedNodes.length}个分类, 是否继续?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$http({
+          url: this.$http.adornUrl('/product/category/delete'),
+          method: 'post',
+          data: this.$http.adornData(ids, false)
+        }).then(({data}) => {
+          this.$message({
+            message: '批量删除成功',
+            type: 'success'
+          })
+          this.getCategory()
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
   },
   created () {

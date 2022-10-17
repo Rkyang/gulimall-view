@@ -5,7 +5,7 @@
              :expand-on-click-node="false"
              node-key="catId"
              :default-expanded-keys="defaultExpanded"
-             show-checkbox draggable :allow-drop="allowDrop">
+             show-checkbox draggable :allow-drop="allowDrop" @node-drop="handleDrop">
     <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
         <span>
@@ -203,6 +203,60 @@ export default {
         }
       }
       return max
+    },
+    // 拖拽成功后触发的事件
+    handleDrop (draggingNode, dropNode, dropType, ev) {
+      console.log('拖拽成功', draggingNode, dropNode, dropType)
+      // 被拖拽节点的最新父节点id
+      let newParentCid = 0
+      // 需要更新排序的分类
+      let siblings = null
+      // 封装完数据的更新对象
+      let updateCategories = []
+
+      if (dropType === 'inner') {
+        // 拖拽至目标节点之内
+        // 父节点等于目标节点
+        newParentCid = dropNode.data.catId
+        // 目标节点内的所有子节点全部更新排序
+        siblings = dropNode.childNodes
+      } else {
+        // 拖拽至目标节点的前或后
+        // 父节点等于目标节点的父节点
+        newParentCid = dropNode.data.parentCid
+        // 目标节点的父节点内的所有子节点全部更新排序
+        siblings = dropNode.parent.childNodes
+      }
+
+      // 封装需要更新排序的分类对象
+      for (let i = 0; i < siblings.length; i++) {
+        if (siblings[i].data.catId === draggingNode.data.catId) {
+          // 如果遍历的是当前正在拖拽的节点
+          let catLevel = draggingNode.level
+          // 且正在拖拽的节点层级发生了变化，那么被拖拽节点的层级及所有子节点的层级都需要变化
+          if (siblings[i].level !== draggingNode.level) {
+            // 更新层级
+            catLevel = siblings[i].level
+            // 更新子节点的层级
+            this.updateChildNodeLevel(siblings[i], updateCategories)
+          }
+          updateCategories.push({catId: siblings[i].data.catId, sort: i, parentCid: newParentCid, catLevel: catLevel})
+        } else {
+          updateCategories.push({catId: siblings[i].data.catId, sort: i})
+        }
+      }
+
+      console.log(updateCategories)
+    },
+    // 递归更新子节点的层级
+    updateChildNodeLevel (node, updateCategories) {
+      if (node.childNodes != null && node.childNodes.length > 0) {
+        for (let i = 0; i < node.childNodes.length; i++) {
+          let childData = node.childNodes[i].data
+          updateCategories.push({catId: childData.catId, catLevel: node.childNodes[i].level})
+          this.updateChildNodeLevel(node.childNodes[i], updateCategories)
+        }
+      }
     }
   },
   created () {

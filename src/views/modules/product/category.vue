@@ -206,7 +206,6 @@ export default {
     },
     // 拖拽成功后触发的事件
     handleDrop (draggingNode, dropNode, dropType, ev) {
-      console.log('拖拽成功', draggingNode, dropNode, dropType)
       // 被拖拽节点的最新父节点id
       let newParentCid = 0
       // 需要更新排序的分类
@@ -246,7 +245,19 @@ export default {
         }
       }
 
-      console.log(updateCategories)
+      this.$http({
+        url: this.$http.adornUrl('/product/category/update/sort'),
+        method: 'post',
+        data: this.$http.adornData(updateCategories, false)
+      }).then(({data}) => {
+        this.$message({
+          message: '分类调整成功',
+          type: 'success'
+        })
+        this.dialogClose()
+        this.getCategory()
+        this.defaultExpanded = [newParentCid]
+      })
     },
     // 递归更新子节点的层级
     updateChildNodeLevel (node, updateCategories) {

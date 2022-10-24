@@ -40,7 +40,10 @@
         prop="logo"
         header-align="center"
         align="center"
-        label="品牌logo地址">
+        label="品牌logo">
+        <template slot-scope="scope">
+            <el-image style="" :src="scope.row.logo" fit="contain"></el-image>
+        </template>
       </el-table-column>
       <el-table-column
         prop="descript"

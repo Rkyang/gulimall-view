@@ -100,6 +100,7 @@ export default {
   name: "attrgroup",
   data () {
     return {
+      cateId: 0,
       dataForm: {
         key: ''
       },
@@ -117,13 +118,14 @@ export default {
   },
   methods: {
     treeNodeClick (data, node, components) {
-      alert('点击了' + data.name + '节点')
+      this.cateId = data.catId
+      this.getDataList()
     },
     // 获取数据列表
     getDataList () {
       this.dataListLoading = true
       this.$http({
-        url: this.$http.adornUrl('/product/attrgroup/list'),
+        url: this.$http.adornUrl(`/product/attrgroup/list/${this.cateId}`),
         method: 'get',
         params: this.$http.adornParams({
           'page': this.pageIndex,

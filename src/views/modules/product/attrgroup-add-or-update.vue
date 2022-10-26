@@ -3,7 +3,7 @@
     :title="!dataForm.attrGroupId ? '新增' : '修改'"
     :close-on-click-modal="false"
     :visible.sync="visible">
-    <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
+    <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="100px">
     <el-form-item label="组名" prop="attrGroupName">
       <el-input v-model="dataForm.attrGroupName" placeholder="组名"></el-input>
     </el-form-item>
@@ -16,8 +16,8 @@
     <el-form-item label="组图标" prop="icon">
       <el-input v-model="dataForm.icon" placeholder="组图标"></el-input>
     </el-form-item>
-    <el-form-item label="所属分类id" prop="catelogId">
-      <el-input v-model="dataForm.catelogId" placeholder="所属分类id"></el-input>
+    <el-form-item label="所属分类" prop="catelogIds">
+      <el-cascader v-model="dataForm.catelogIds" :options="categorise" :props="cascaderProps" placeholder="试试搜索：手机" clearable filterable></el-cascader>
     </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -31,6 +31,12 @@
   export default {
     data () {
       return {
+        categorise: [],
+        cascaderProps: {
+          value: 'catId',
+          label: 'name',
+          children: 'child'
+        },
         visible: false,
         dataForm: {
           attrGroupId: 0,
@@ -38,6 +44,7 @@
           sort: '',
           descript: '',
           icon: '',
+          catelogIds: [],
           catelogId: ''
         },
         dataRule: {
@@ -53,13 +60,21 @@
           icon: [
             { required: true, message: '组图标不能为空', trigger: 'blur' }
           ],
-          catelogId: [
-            { required: true, message: '所属分类id不能为空', trigger: 'blur' }
+          catelogIds: [
+            { required: true, message: '所属分类不能为空', trigger: 'blur' }
           ]
         }
       }
     },
     methods: {
+      getCategory () {
+        this.$http({
+          url: this.$http.adornUrl('/product/category/list/tree'),
+          method: 'get'
+        }).then(({data}) => {
+          this.categorise = data.listTree
+        })
+      },
       init (id) {
         this.dataForm.attrGroupId = id || 0
         this.visible = true
@@ -77,6 +92,7 @@
                 this.dataForm.descript = data.attrGroup.descript
                 this.dataForm.icon = data.attrGroup.icon
                 this.dataForm.catelogId = data.attrGroup.catelogId
+                this.dataForm.catelogIds = data.attrGroup.catelogIds
               }
             })
           }
@@ -95,7 +111,7 @@
                 'sort': this.dataForm.sort,
                 'descript': this.dataForm.descript,
                 'icon': this.dataForm.icon,
-                'catelogId': this.dataForm.catelogId
+                'catelogId': this.dataForm.catelogIds[this.dataForm.catelogIds.length - 1]
               })
             }).then(({data}) => {
               if (data && data.code === 0) {
@@ -115,6 +131,9 @@
           }
         })
       }
+    },
+    created () {
+      this.getCategory()
     }
   }
 </script>

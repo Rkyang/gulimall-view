@@ -30,8 +30,8 @@ export default {
       })
     },
     treeNodeClick (data, node, components) {
-      if (data.catLevel === 3) {
-        this.$emit('tree-node-click', data, node, components);
+      if (data.child == null) {
+        this.$emit('tree-node-click', data, node, components)
       }
     }
   },

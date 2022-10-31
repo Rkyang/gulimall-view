@@ -10,6 +10,7 @@
         </el-form-item>
         <el-form-item>
           <el-button @click="getDataList()">查询</el-button>
+          <el-button type="success" @click="getDataList(true)">查询全部</el-button>
           <el-button v-if="isAuth('product:attrgroup:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
           <el-button v-if="isAuth('product:attrgroup:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
         </el-form-item>
@@ -69,6 +70,7 @@
           width="150"
           label="操作">
           <template slot-scope="scope">
+            <el-button type="text" size="small" @click="relationHandle(scope.row.attrGroupId)">关联</el-button>
             <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.attrGroupId)">修改</el-button>
             <el-button type="text" size="small" @click="deleteHandle(scope.row.attrGroupId)">删除</el-button>
           </template>
@@ -85,6 +87,9 @@
       </el-pagination>
       <!-- 弹窗, 新增 / 修改 -->
       <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
+
+      <!-- 修改关联关系 -->
+      <relation-update v-if="relationVisible" ref="relationUpdate" @refreshData="getDataList"></relation-update>
     </el-col>
   </el-row>
 </template>
@@ -92,14 +97,17 @@
 <script>
 import categoryTree from "../common/categoryTree"
 import AddOrUpdate from './attrgroup-add-or-update'
+import RelationUpdate from "./attr-group-relation"
 export default {
   components: {
     categoryTree,
-    AddOrUpdate
+    AddOrUpdate,
+    RelationUpdate
   },
   name: "attrgroup",
   data () {
     return {
+      relationVisible: false,
       cateId: 0,
       dataForm: {
         key: ''
@@ -117,12 +125,22 @@ export default {
     this.getDataList()
   },
   methods: {
+    // 处理分组与属性的关联
+    relationHandle (groupId) {
+      this.relationVisible = true
+      this.$nextTick(() => {
+        this.$refs.relationUpdate.init(groupId)
+      })
+    },
     treeNodeClick (data, node, components) {
       this.cateId = data.catId
       this.getDataList()
     },
     // 获取数据列表
-    getDataList () {
+    getDataList (flag) {
+      if (flag) {
+        this.cateId = 0
+      }
       this.dataListLoading = true
       this.$http({
         url: this.$http.adornUrl(`/product/attrgroup/list/${this.cateId}`),

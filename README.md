@@ -1,5 +1,5 @@
-#### 为了更好的服务国内用户，renren-fast-vue仓库已迁移到Gitee，新的仓库地址 https://gitee.com/renrenio/renren-ui ，以后会在 https://gitee.com/renrenio/renren-ui 里面进行更新维护，感谢支持！ :smiley: 
-<br> 
+#### 为了更好的服务国内用户，renren-fast-vue仓库已迁移到Gitee，新的仓库地址 https://gitee.com/renrenio/renren-ui ，以后会在 https://gitee.com/renrenio/renren-ui 里面进行更新维护，感谢支持！ :smiley:
+<br>
 
 ## renren-fast-vue
 - renren-fast-vue基于vue、element-ui构建开发，实现[renren-fast](https://gitee.com/renrenio/renren-fast)后台管理前端功能，提供一套更优的前端解决方案
@@ -20,3 +20,10 @@
 
 ## 更新日志
 每个版本的详细更改都记录在[release notes](https://github.com/renrenio/renren-fast-vue/releases)中。
+
+## 代码download后到运行需要的配置，谨以此做个人的学习备忘（2022.11.17 by Rkyang）
+1. 推荐使用node.js版本：12.18.2
+2. 配置npm使用淘宝源：npm config set registry http://registry.npm.taobao.org/
+3. 先单独下载node-sass（会有renrenfast的警告或者错误，我忽略了）：npm i node-sass --sass_binary_site=https://npm.taobao.org/mirrors/node-sass/
+4. 执行npm install，错误和警告我也忽略了
+5. 执行npm run dev启动项目

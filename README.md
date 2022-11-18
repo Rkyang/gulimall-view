@@ -25,5 +25,6 @@
 1. 推荐使用node.js版本：12.18.2
 2. 配置npm使用淘宝源：npm config set registry http://registry.npm.taobao.org/
 3. 先单独下载node-sass（会有renrenfast的警告或者错误，我忽略了）：npm i node-sass --sass_binary_site=https://npm.taobao.org/mirrors/node-sass/
-4. 执行npm install，错误和警告我也忽略了
+4. 执行cnpm install，错误和警告我也忽略了（cnpm版本：npm install cnpm@7.1.0 -g --registry=https://registry.npm.taobao.org）
+   1. 后续安装pubsub-js也使用cnpm
 5. 执行npm run dev启动项目

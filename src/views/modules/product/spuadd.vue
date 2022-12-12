@@ -634,58 +634,58 @@ export default {
           }
         }
       }
-      return res;
+      return res
     },
-    getShowSaleAttr() {
-      //获取当前分类可以使用的销售属性
+    getShowSaleAttr () {
+      // 获取当前分类可以使用的销售属性
       if (!this.dataResp.steped[1]) {
         this.$http({
           url: this.$http.adornUrl(
             `/product/attr/sale/list/${this.spu.catalogId}`
           ),
-          method: "get",
+          method: 'get',
           params: this.$http.adornParams({
             page: 1,
             limit: 500
           })
         }).then(({ data }) => {
-          this.dataResp.saleAttrs = data.page.list;
+          this.dataResp.saleAttrs = data.page.list
           data.page.list.forEach(item => {
             this.dataResp.tempSaleAttrs.push({
               attrId: item.attrId,
               attrValues: [],
               attrName: item.attrName
             });
-            this.inputVisible.push({ view: false });
-            this.inputValue.push({ val: "" });
+            this.inputVisible.push({ view: false })
+            this.inputValue.push({ val: '' })
           });
-          this.dataResp.steped[1] = true;
-        });
+          this.dataResp.steped[1] = true
+        })
       }
     },
-    showBaseAttrs() {
+    showBaseAttrs () {
       if (!this.dataResp.steped[0]) {
         this.$http({
           url: this.$http.adornUrl(
             `/product/attrgroup/${this.spu.catalogId}/withattr`
           ),
-          method: "get",
+          method: 'get',
           params: this.$http.adornParams({})
         }).then(({ data }) => {
-          //先对表单的baseAttrs进行初始化
+          // 先对表单的baseAttrs进行初始化
           data.data.forEach(item => {
             let attrArray = [];
             item.attrs.forEach(attr => {
               attrArray.push({
                 attrId: attr.attrId,
-                attrValues: "",
+                attrValues: '',
                 showDesc: attr.showDesc
               });
             });
-            this.dataResp.baseAttrs.push(attrArray);
+            this.dataResp.baseAttrs.push(attrArray)
           });
-          this.dataResp.steped[0] = 0;
-          this.dataResp.attrGroups = data.data;
+          this.dataResp.steped[0] = 0
+          this.dataResp.attrGroups = data.data
         });
       }
     },

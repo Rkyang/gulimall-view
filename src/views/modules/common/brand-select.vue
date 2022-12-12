@@ -4,7 +4,7 @@
       <el-option
         v-for="item in brands"
         :key="item.brandId"
-        :label="item.brandName"
+        :label="item.name"
         :value="item.brandId"
       ></el-option>
     </el-select>
@@ -48,7 +48,7 @@ export default {
         url: this.$http.adornUrl("/product/categorybrandrelation/brands/list"),
         method: "get",
         params: this.$http.adornParams({
-          catId: this.catId
+          catId: this.catId === undefined ? 0 : this.catId
         })
       }).then(({ data }) => {
         this.brands = data.data;

@@ -28,3 +28,6 @@
 4. 执行cnpm install，错误和警告我也忽略了（cnpm版本：npm install cnpm@7.1.0 -g --registry=https://registry.npm.taobao.org）
    1. 后续安装pubsub-js也使用cnpm
 5. 执行npm run dev启动项目
+
+## 更改后台api访问地址
+/static/config/index.js
